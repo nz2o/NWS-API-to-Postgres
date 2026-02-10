@@ -4,15 +4,20 @@ services:
   # Check postgres data volume mapping, as higher versions changed default data directory.
   # You probably want to set up Postgis extension, which may require a custom Dockerfile based on the postgres image.
   db:
-    image: postgres:15
+    # Use the PostGIS image for PostgreSQL 18 (includes PostGIS extensions)
+    image: postgis/postgis:18
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: nws
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nws}
+      # Use the recommended PGDATA path for newer Postgres images to avoid initialization issues
+      PGDATA: /var/lib/postgresql/data/pgdata
+    # Map host port to container port; configure POSTGRES_HOST_PORT and POSTGRES_PORT in your .env
     ports:
-      - "5432:5432"
+      - "${POSTGRES_HOST_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    # Recommended: use a named volume mapped to the container PGDATA directory
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data/pgdata
 
   app:
     build: .
