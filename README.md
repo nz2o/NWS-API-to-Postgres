@@ -2,7 +2,7 @@
 
 Minimal FastAPI service that receives NWS alerts and stores them in Postgres.
 
-See `install.md` for installation and run instructions. 🚀
+See [installation instructions](./install.md) for installation and run instructions. 🚀
 
 Notes
 
