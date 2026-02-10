@@ -1,0 +1,35 @@
+services:
+  # Uncomment if you don't already have a database.
+  # Ensure you use proper .env or secrets management.
+  # Check postgres data volume mapping, as higher versions changed default data directory.
+  # You probably want to set up Postgis extension, which may require a custom Dockerfile based on the postgres image.
+  #db:
+  #  image: postgres:15
+  #  environment:
+  #    POSTGRES_USER: postgres
+  #    POSTGRES_PASSWORD: postgres
+  #    POSTGRES_DB: nws
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    # Uncomment if you have a database service defined above.
+    #depends_on:
+    #  - db
+    # Load environment variables from .env (preferred) or the host environment.
+    env_file:
+      - .env
+    environment:
+      # Provide DATABASE_URL explicitly in your environment or .env for security.
+      # Default falls back to a local `db` service if you uncomment it above.
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-nws}}
+    ports:
+      # Map a configurable host port to container port 8000. Set APP_PORT in .env.
+      # For example, to use port 18080 on the host set APP_PORT=18080 in .env
+      - "${APP_HOST_BIND:-}:${APP_PORT:-18080}:8000"
+
+volumes:
+  db_data:
