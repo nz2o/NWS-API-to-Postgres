@@ -3,22 +3,22 @@ services:
   # Ensure you use proper .env or secrets management.
   # Check postgres data volume mapping, as higher versions changed default data directory.
   # You probably want to set up Postgis extension, which may require a custom Dockerfile based on the postgres image.
-  #db:
-  #  image: postgres:15
-  #  environment:
-  #    POSTGRES_USER: postgres
-  #    POSTGRES_PASSWORD: postgres
-  #    POSTGRES_DB: nws
-  #  ports:
-  #    - "5432:5432"
-  #  volumes:
-  #    - db_data:/var/lib/postgresql/data
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nws
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   app:
     build: .
     # Uncomment if you have a database service defined above.
-    #depends_on:
-    #  - db
+    depends_on:
+      - db
     # Load environment variables from .env (preferred) or the host environment.
     env_file:
       - .env
