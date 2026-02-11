@@ -5,7 +5,7 @@ services:
   # You probably want to set up Postgis extension, which may require a custom Dockerfile based on the postgres image.
   db:
     # Use the PostGIS image for PostgreSQL 18 (includes PostGIS extensions)
-    image: postgis/postgis:18
+    image: postgis/postgis:latest
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}

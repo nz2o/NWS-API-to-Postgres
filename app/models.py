@@ -11,7 +11,7 @@ class Alert(Base):
 
     # Core fields
     event = Column(String, index=True, nullable=True)
-    eventcode = Column(String, index=True, nullable=True)
+    eventcode = Column(JSONB, nullable=True)
     headline = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
     instruction = Column(Text, nullable=True)

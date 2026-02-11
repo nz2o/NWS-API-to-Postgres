@@ -1,8 +1,9 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import SQLAlchemyError
+import time
+from sqlalchemy import create_engine  # type: ignore
+from sqlalchemy.orm import sessionmaker  # type: ignore
+from sqlalchemy.ext.declarative import declarative_base  # type: ignore
+from sqlalchemy.exc import SQLAlchemyError  # type: ignore
 
 # Require DATABASE_URL to be explicitly provided for security.
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -12,18 +13,28 @@ if not DATABASE_URL:
 # Create engine with pool_pre_ping to avoid stale connections.
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-# Fail fast: attempt a simple connection to validate credentials/access.
-try:
-    conn = engine.connect()
-    conn.close()
-except SQLAlchemyError as e:
-    raise RuntimeError(f"Unable to connect to the database: {e}")
-
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
 
-def init_db():
+def init_db(retries: int = 8, backoff_factor: int = 1):
+    """Wait for the DB to be ready (with retries), then create tables and seed.
+
+    This avoids failing at import time when Postgres is still initializing.
+    """
+    last_exc = None
+    for attempt in range(retries):
+        try:
+            conn = engine.connect()
+            conn.close()
+            break
+        except SQLAlchemyError as e:
+            last_exc = e
+            sleep = backoff_factor * (2 ** attempt)
+            time.sleep(sleep)
+    else:
+        raise RuntimeError(f"Unable to connect to the database after {retries} attempts: {last_exc}")
+
     # create tables
     Base.metadata.create_all(bind=engine)
     # seed default emoji mappings if tables are empty
